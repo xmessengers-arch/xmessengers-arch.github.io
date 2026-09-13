@@ -1,4 +1,4 @@
-const CACHE = 'voxly-v1';
+const CACHE = 'voxly-v2';
 const CORE = ['/', '/index.html', '/manifest.json'];
 
 self.addEventListener('install', (e) => {
@@ -41,5 +41,48 @@ self.addEventListener('fetch', (e) => {
       .catch(() =>
         caches.match(e.request).then((m) => m || caches.match('/index.html'))
       )
+  );
+});
+
+// ---------------- Web Push ----------------
+self.addEventListener('push', (e) => {
+  let notification = { title: 'Voxly', body: 'Новое сообщение', data: {} };
+  try {
+    const data = e.data ? e.data.json() : null;
+    if (data && typeof data === 'object') {
+      notification.title = data.title || notification.title;
+      notification.body = data.body || notification.body;
+      notification.data = data.data || {};
+    }
+  } catch {
+    // non-JSON payload (e.g. empty ping) — show default
+  }
+  e.waitUntil(
+    self.registration.showNotification(notification.title, {
+      body: notification.body,
+      icon: '/icons/icon-192.png',
+      badge: '/icons/icon-96.png',
+      data: notification.data,
+      requireInteraction: false,
+    })
+  );
+});
+
+self.addEventListener('notificationclick', (e) => {
+  const data = e.notification.data || {};
+  e.notification.close();
+  const chatId = data.chatId || data.channelId;
+  let targetUrl = '/';
+  if (chatId) targetUrl = `/?chat=${encodeURIComponent(chatId)}`;
+  e.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((winList) => {
+      for (const client of winList) {
+        if ('focus' in client) {
+          client.navigate(targetUrl);
+          return client.focus();
+        }
+      }
+      return clients.openWindow(targetUrl);
+    })
   );
 });
