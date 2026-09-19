@@ -23,7 +23,8 @@
         flex: 1;
       }
     </style>
-  <link rel="icon" href="/favicon.ico" /></head>
+  <link rel="icon" href="/favicon.ico" />    <link rel="manifest" href="/manifest.json" />
+  </head>
 
   <body>
     <!-- Use static rendering with Expo Router to support running without JavaScript. -->
@@ -32,6 +33,13 @@
     </noscript>
     <!-- The root element for your Expo app. -->
     <div id="root"></div>
-  <script src="/_expo/static/js/web/entry-bdef9cb84b43204d95a3dbcc58b9cbb3.js" defer></script>
+  <script src="/_expo/static/js/web/entry-df8e2d0b0af229c22165489e9f5328e9.js" defer></script>
+<script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('/sw.js').catch(function () {});
+      });
+    }
+  </script>
 </body>
 </html>
